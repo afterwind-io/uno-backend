@@ -1,0 +1,4 @@
+node_modules
+build
+redis/bin
+redis/db

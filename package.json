@@ -1,0 +1,28 @@
+{
+  "name": "uno-backend",
+  "version": "1.0.0",
+  "main": "./build/index.js",
+  "author": "AfterWind <spmushroom@hotmail.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=9"
+  },
+  "scripts": {
+    "start": "tsc &&node --harmony ./build/index.js",
+    "local": "tsc &&node --harmony --inspect=5641 ./build/index.js",
+    "db": "cd ./redis &&./bin/redis-server ./redis.conf",
+    "cli": "./redis/bin/redis-cli"
+  },
+  "dependencies": {
+    "ioredis": "^3.2.2",
+    "jsonwebtoken": "^8.1.0",
+    "socket.io": "^2.0.4",
+    "typescript": "^2.6.2"
+  },
+  "devDependencies": {
+    "@types/ioredis": "^3.2.4",
+    "@types/jsonwebtoken": "^7.2.5",
+    "@types/socket.io": "^1.4.31",
+    "chalk": "^2.3.0"
+  }
+}

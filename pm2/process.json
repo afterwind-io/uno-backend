@@ -1,0 +1,23 @@
+{
+  "apps": [
+    {
+      "name": "uno-backend",
+      "cwd": "./",
+      "script": "./pm2/process.server.sh",
+      "env": {
+        "NODE_ENV": "develop"
+      },
+      "env_prod": {
+        "NODE_ENV": "product"
+      },
+      "watch": [
+        "./src"
+      ],
+      "args": [
+        "--color"
+      ],
+      "autorestart": true,
+      "restart_delay": 1000
+    }
+  ]
+}
