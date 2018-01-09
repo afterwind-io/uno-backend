@@ -28,7 +28,7 @@ export class UNO {
   public d2: boolean = false
   public d4: boolean = false
 
-  public lastCard: Card
+  public lastCards: Card[] = []
   public turns: number = -1
   public pointer: number = 0
   public penalty: number = 1
@@ -45,14 +45,11 @@ export class UNO {
   }
 
   call(cards: Card[]) {
-    const card = cards[0]
-    this.pushState(card)
-
-    if (card.isEntityCard) {
-      this.lastCard = card
-    }
+    this.pushState(cards[0])
 
     this.deck.toss(cards)
+
+    this.lastCards = cards
     this.turns++
   }
 

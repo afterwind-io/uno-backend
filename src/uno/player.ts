@@ -47,7 +47,7 @@ export class PlayerProxy {
         penalties
       )
 
-      this.lastDeal = deals[0]
+      this.recordLastDeal(deals[0])
       this.toss(deals)
       return deals
     } else {
@@ -58,7 +58,7 @@ export class PlayerProxy {
   }
 
   deal(deals: Card[]) {
-    this.lastDeal = deals[0]
+    this.recordLastDeal(deals[0])
     this.toss(deals)
 
     this.handler(deals)
@@ -74,5 +74,12 @@ export class PlayerProxy {
       const index = this.cards.findIndex(card => card.isSameCard(discard))
       index !== -1 && this.cards.splice(index, 1);
     })
+  }
+
+  private recordLastDeal(deal: Card) {
+    // IF TEST, COMMENT THIS LINE
+    // if (!deal.isEntityCard) return
+
+    this.lastDeal = deal
   }
 }

@@ -19,22 +19,22 @@ router.on('game/start', async (packet: IPramStart, socket) => {
   const room = await Room.fetch(roomId)
 
   const players = []
-  // for (let index = 0; index < room.players.length; index++) {
-  //   const uid = room.players[index]
-  //   const player = await Player.fetch(uid)
-  //   players.push(player)
-  // }
-
-  // TEST
-  for (let index = 0; index < 6; index++) {
-    const player = await Player.createAI()
+  for (let index = 0; index < room.players.length; index++) {
+    const uid = room.players[index]
+    const player = await Player.fetch(uid)
     players.push(player)
   }
+
+  // TEST
+  // for (let index = 0; index < 6; index++) {
+  //   const player = await Player.createAI()
+  //   players.push(player)
+  // }
 
   for await (const report of UNO.loop(roomId, players)) {
     // TODO
     if (report.action === 'ready') {
-      ws.to(roomId).emit('game/ready')
+      ws.to(roomId).emit('game/ready', roomId)
     }
 
     // 初始抽牌
@@ -46,10 +46,11 @@ router.on('game/start', async (packet: IPramStart, socket) => {
 
     // 发放罚牌
     if (report.action === 'penalty') {
-      // const socketId = report.snapshot.currentPlayer.player.socketId
-      // ws.to(socketId).emit('game/penalty', report.cards)
+      const { socketId, cards } = report.playerHands[0]
+      ws.to(socketId).emit('game/penalty', cards)
     }
 
+    // 更新状态
     if (report.action === 'update') {
       ws.to(roomId).emit('game/update', report.snapshot)
     }

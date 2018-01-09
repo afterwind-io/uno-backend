@@ -14,11 +14,11 @@ interface UNOPlayerSnapshot {
 }
 
 interface UNOSnapshot {
-  color: CardColor;
-  symbol: CardSymbol;
-  d2: boolean;
-  d4: boolean;
-  lastCard: Card
+  color: CardColor
+  symbol: CardSymbol
+  d2: boolean
+  d4: boolean
+  lastCards: Card[]
   pointer: number
   penaltyCount: number
   action: UNOAction
@@ -52,7 +52,7 @@ function getSnapshot(game: UNO, players: PlayerProxy[]): UNOSnapshot {
     symbol: game.symbol,
     d2: game.d2,
     d4: game.d4,
-    lastCard: game.lastCard,
+    lastCards: game.lastCards,
     pointer: game.pointer,
     penaltyCount: game.penalty,
     action: game.action,
@@ -135,8 +135,11 @@ export async function* loop(roomId: string, players: Player[]): AsyncIterableIte
         ? game.pick(game.penalty)
         : []
 
+      // 读取当前玩家实例
+      const currentPlayer = unoPlayers[game.pointer]
+
       // 向接受罚牌的玩家发送罚牌信息
-      yield { action: 'penalty', cards: penalties }
+      yield { action: 'penalty', playerHands: [{ socketId: currentPlayer.player.socketId, cards: penalties }] }
 
       // 向房间广播当前状态
       yield { action: 'update', snapshot: getSnapshot(game, unoPlayers) }
@@ -145,9 +148,6 @@ export async function* loop(roomId: string, players: Player[]): AsyncIterableIte
       // 则其出牌信息将经过ws路由，通过下方的call方法，
       // resolve当前currentPlayer的think返回的promise，
       // 从而异步衔接上循环
-
-      // 读取当前玩家实例
-      const currentPlayer = unoPlayers[game.pointer]
 
       // 异步等待PlayerProxy的返回出牌信息
       const deals = await currentPlayer.think(
