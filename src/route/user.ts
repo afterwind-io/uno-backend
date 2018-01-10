@@ -24,7 +24,6 @@ router.on('user/register', async (packet: IParamRegister, socket): Promise<IRetu
   const test = await User.fetchByName(name)
   if (test !== void 0) throw new Error('该用户名已被注册')
 
-  // TODO: 重复登录检测
   const user = prune(await User.create({ name, password }), ['password'])
   const player = await Player.createHuman(false, socket.id, user)
   const token = JWT.sign({ uid: player.uid, r: Math.random() }, CONFIG.secret)
@@ -47,7 +46,7 @@ interface IReturnLogin {
 router.on('user/login', async (packet: IParamLogin, socket): Promise<IReturnLogin> => {
   const { anonymous, username, password } = packet
 
-  let user
+  let user: User
   if (!anonymous) {
     user = await User.fetchByName(username)
 
@@ -58,7 +57,10 @@ router.on('user/login', async (packet: IParamLogin, socket): Promise<IReturnLogi
     prune(user, ['password'])
   }
 
-  // TODO: 重复登录检测
+  // if (await Player.isOnline(user.uid)) {
+  //   throw new Error(`玩家"${username}"已登录`)
+  // }
+
   const player = await Player.createHuman(anonymous, socket.id, user)
   const token = JWT.sign({ uid: player.uid, r: Math.random() }, CONFIG.secret)
 

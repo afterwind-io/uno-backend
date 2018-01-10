@@ -47,7 +47,7 @@ router.on('game/start', async (packet: IPramStart, socket) => {
     // 发放罚牌
     if (report.action === 'penalty') {
       const { socketId, cards } = report.playerHands[0]
-      ws.to(socketId).emit('game/penalty', cards)
+      ws.to(socketId).emit('game/pick', cards)
     }
 
     // 更新状态
@@ -69,7 +69,7 @@ interface IPramCall {
 router.on('game/deal', async (packet: IPramCall) => {
   const { roomId, deals } = packet
 
-  UNO.deal(roomId, deals)
+  UNO.deal(roomId, deals.map(card => new Card(card.color, card.symbol)))
 })
 
 interface IParamMatch {

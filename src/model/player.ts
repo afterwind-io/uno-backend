@@ -16,7 +16,7 @@ interface PlayerOption {
 }
 
 const redis = ConnectRedis(CONFIG.redis.cache)
-const REDIS_PLAYER_INDEX = 'player.index'
+const REDIS_PLAYER_ONLINE = 'player.online'
 
 /**
  * 获取玩家存储key的标准形式
@@ -234,18 +234,32 @@ export class Player extends Serializable implements IUser {
   }
 
   /**
-   * 根据索引范围获取一组玩家实例
+   * 根据指定数量获取一组玩家实例
+   * 
+   * 注：由于redis机制问题，此处返回的结果为随机获取
    * 
    * @static
-   * @param {number} [start=0] 开始索引
-   * @param {number} [end=-1] 结束索引
+   * @param {number} [count=0] 需要获取的数量
    * @returns {Promise<Player[]>} 玩家实例数组
    * @memberof Player
    */
-  static async fetchRange(start: number = 0, end: number = -1): Promise<Player[]> {
-    const uids = await redis.lrange(REDIS_PLAYER_INDEX, start, end)
+  static async fetchRange(count: number = 0): Promise<Player[]> {
+    const uids = await redis.srandmember(REDIS_PLAYER_ONLINE, count)
 
     return Player.fetchMulti(uids)
+  }
+
+  /**
+   * 判断指定玩家是否在线
+   * 
+   * @static
+   * @param {string} uid 玩家uid
+   * @returns {Promise<boolean>} 判断结果
+   * @memberof Player
+   */
+  static async isOnline(uid: string): Promise<boolean> {
+    const flag = await redis.sismember(REDIS_PLAYER_ONLINE, uid)
+    return flag === 1
   }
 
   /**
@@ -299,10 +313,10 @@ export class Player extends Serializable implements IUser {
   }
 
   private async inqueue() {
-    return await redis.lpush(REDIS_PLAYER_INDEX, this.uid)
+    return await redis.sadd(REDIS_PLAYER_ONLINE, this.uid)
   }
 
   private async dequeue() {
-    return await redis.lrem(REDIS_PLAYER_INDEX, 0, this.uid)
+    return await redis.srem(REDIS_PLAYER_ONLINE, 0, this.uid)
   }
 }

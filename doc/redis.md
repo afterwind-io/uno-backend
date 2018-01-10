@@ -18,8 +18,8 @@
 `player.{8位字母}`
 
 ## 在线玩家列表
-以List形式存储玩家uid，格式如下：
-`player.index:[{uid}, {uid}, ...]`
+以Sets形式存储玩家uid，格式如下：
+`player.online:[{uid}, {uid}, ...]`
 
 ## AI信息
 以String形式存储，格式如下：
