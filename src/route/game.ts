@@ -6,6 +6,8 @@ import { Player } from '../model/player'
 import { Room } from '../model/room'
 import * as UNO from '../uno'
 import { Card } from '../uno/model/card'
+import prune from '../util/prune';
+import merge from '../util/merge';
 
 // router.of('api')
 
@@ -34,7 +36,12 @@ router.on('game/start', async (packet: IPramStart, socket) => {
   for await (const report of UNO.loop(roomId, players)) {
     // TODO
     if (report.action === 'ready') {
-      ws.to(roomId).emit('game/ready', roomId)
+      // TODO: 以下逻辑应提取公共方法
+      const detail = await room.populate()
+      const status = UNO.getStatus(room.uid)
+
+      const info = prune(merge(room, status), ['password', 'scores'])
+      ws.to(roomId).emit('game/ready', info)
     }
 
     // 初始抽牌

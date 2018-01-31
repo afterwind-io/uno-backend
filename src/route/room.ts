@@ -11,6 +11,7 @@ import * as UNO from '../uno'
 // router.of('api')
 
 function getRoomInfo(room: RoomDetail, status: UNOStatus) {
+  // TODO: 不应暴露字段实现至外侧
   return prune(merge(room, status), ['password', 'scores'])
 }
 
@@ -69,7 +70,10 @@ router.on('room/join', async (packet: IParamJoin, socket): Promise<IReturnJoin> 
 
   const detail = await room.populate()
   const status = UNO.getStatus(room.uid)
-  return getRoomInfo(detail, status)
+
+  const info = getRoomInfo(detail, status)
+  socket.to(room.uid).emit('room/update', info)
+  return info
 })
 
 interface IParamAddbot {
@@ -78,7 +82,7 @@ interface IParamAddbot {
 
 interface IReturnAddbot extends RoomDetail, UNOStatus { }
 
-router.on('room/addbot', async (packet: IParamAddbot): Promise<IReturnAddbot> => {
+router.on('room/addbot', async (packet: IParamAddbot, socket): Promise<IReturnAddbot> => {
   const { roomId } = packet
 
   const room = await Room.fetch(roomId)
@@ -90,17 +94,20 @@ router.on('room/addbot', async (packet: IParamAddbot): Promise<IReturnAddbot> =>
 
   const detail = await room.populate()
   const status = UNO.getStatus(room.uid)
-  return getRoomInfo(detail, status)
+
+  const info = getRoomInfo(detail, status)
+  socket.to(room.uid).emit('room/update', info)
+  return info
 })
 
-interface IPrameKick {
+interface IParamKick {
   roomId: string,
   playerId: string,
 }
 
 interface IReturnKick extends RoomDetail, UNOStatus { }
 
-router.on('room/kick', async (packet): Promise<IReturnKick> => {
+router.on('room/kick', async (packet: IParamKick, socket): Promise<IReturnKick> => {
   const { roomId, playerId: targetId } = packet
 
   const room = await Room.fetch(roomId)
@@ -127,7 +134,10 @@ router.on('room/kick', async (packet): Promise<IReturnKick> => {
 
   const detail = await room.populate()
   const status = UNO.getStatus(room.uid)
-  return getRoomInfo(detail, status)
+
+  const info = getRoomInfo(detail, status)
+  socket.to(room.uid).emit('room/update', info)
+  return info
 })
 
 interface IParamLeave {
@@ -158,6 +168,13 @@ router.on('room/leave', async (packet: IParamLeave, socket) => {
 
     // 销毁房间实例
     await Room.remove(room.uid)
+  } else {
+    const detail = await room.populate()
+    const status = UNO.getStatus(room.uid)
+
+    const info = getRoomInfo(detail, status)
+    socket.to(room.uid).emit('room/update', info)
+    return info
   }
 })
 
@@ -193,7 +210,7 @@ interface IParamUpdate {
 
 interface IReturnUptate extends RoomDetail, UNOStatus { }
 
-router.on('room/update', async (packet: IParamUpdate): Promise<IReturnUptate> => {
+router.on('room/update', async (packet: IParamUpdate, socket): Promise<IReturnUptate> => {
   const { roomId, option } = packet
 
   const room = await Room.fetch(roomId)
@@ -202,6 +219,7 @@ router.on('room/update', async (packet: IParamUpdate): Promise<IReturnUptate> =>
   const detail = await room.populate()
   const status = UNO.getStatus(roomId)
 
-  // TODO: 不应暴露字段实现至外侧
-  return getRoomInfo(detail, status)
+  const info = getRoomInfo(detail, status)
+  socket.to(room.uid).emit('room/update', info)
+  return info
 })

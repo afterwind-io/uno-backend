@@ -181,8 +181,9 @@ export class Room extends Serializable {
    */
   static async fetchRange(start: number = 0, end: number = -1): Promise<Room[]> {
     const uids = await redis.lrange(REDIS_ROOM_INDEX, start, end)
-    const keys = uids.map(uid => wrapKey(uid))
+    if (uids.length === 0) return []
 
+    const keys = uids.map(uid => wrapKey(uid))
     return Room.fetchMulti(keys)
   }
 
