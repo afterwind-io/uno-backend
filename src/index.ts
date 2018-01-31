@@ -1,5 +1,8 @@
-import * as http from 'http'
-import './route'
+const Koa = require('koa')
+const fstatic = require('koa-static')
+require('./route')
 
-const app = http.createServer()
-app.listen()
+const app = new Koa()
+app.use(fstatic('static'))
+
+app.listen(10086)

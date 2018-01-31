@@ -24,18 +24,8 @@ const REDIS_PLAYER_ONLINE = 'player.online'
  * @param {string} key 用作key的关键字
  * @returns {string} 附加前缀的存储key
  */
-function wrapPlayerId(key: string): string {
+function wrapKey(key: string): string {
   return 'player.' + key
-}
-
-/**
- * 获取ai存储key的标准形式
- * 
- * @param {string} key 用作key的关键字
- * @returns {string} 附加前缀的存储key
- */
-function wrapAiId(key: string) {
-  return 'ai.' + key
 }
 
 /**
@@ -156,7 +146,7 @@ export class Player extends Serializable implements IUser {
   static async createHuman(anonymous: boolean, socketId: string, user?: User): Promise<Player> {
     let option: any = { anonymous, socketId }
     if (!anonymous) {
-      option.uid = wrapPlayerId(user.uid)
+      option.uid = wrapKey(user.uid)
       option.name = user.name
       option.avatar = user.avatar
     }
@@ -177,12 +167,13 @@ export class Player extends Serializable implements IUser {
    * @memberof Player
    */
   static async createAI(): Promise<Player> {
-    const uid = wrapAiId(idGen())
+    const uid = idGen()
     const ai = new Player({
-      uid,
+      uid: wrapKey('ai#' + uid),
       name: 'AI小姐姐#' + uid,
       anonymous: false,
       type: PlayerType.ai,
+      avatar: 'ai.png',
     })
 
     await ai.save()
@@ -282,7 +273,7 @@ export class Player extends Serializable implements IUser {
   private constructor(option: PlayerOption) {
     super()
 
-    this.uid = option.uid || wrapPlayerId(idGen())
+    this.uid = option.uid
     this.name = option.name || '玩家' + this.uid
     this.avatar = option.avatar || ''
     this.anonymous = option.anonymous || false
@@ -290,6 +281,14 @@ export class Player extends Serializable implements IUser {
     this.type = option.type || 'human'
     this.status = option.status || PlayerStatus.idle
     this.roomId = option.roomId || '0'
+  }
+
+  get isHuman(): boolean {
+    return this.type === PlayerType.human
+  }
+
+  get isAi(): boolean {
+    return this.type === PlayerType.ai
   }
 
   async join(roomId: string) {

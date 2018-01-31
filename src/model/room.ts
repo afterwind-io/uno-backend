@@ -211,7 +211,7 @@ export class Room extends Serializable {
 
   get humanPlayerCount(): number {
     // TODO: 不应在此处出现ai id判断逻辑
-    return this.players.filter(playerUid => !playerUid.startsWith('ai')).length
+    return this.players.filter(playerUid => !playerUid.includes('ai#')).length
   }
 
   async update(option: RoomOption) {
@@ -229,7 +229,7 @@ export class Room extends Serializable {
 
   async removePlayer(uid: string) {
     const index = this.players.findIndex(id => uid === id)
-    index !== -1 && this.players.slice(index, 1)
+    index !== -1 && this.players.splice(index, 1)
 
     await this.save()
   }

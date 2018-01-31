@@ -16,6 +16,8 @@
   "dependencies": {
     "ioredis": "^3.2.2",
     "jsonwebtoken": "^8.1.0",
+    "koa": "^2.4.1",
+    "koa-static": "^4.0.2",
     "socket.io": "^2.0.4",
     "typescript": "^2.6.2"
   },

@@ -4,6 +4,7 @@ import router from './router'
 import User from '../model/user'
 import { Player } from '../model/player'
 import prune from '../util/prune'
+import merge from '../util/merge'
 
 // router.of('api')
 
@@ -14,8 +15,7 @@ interface IParamRegister {
 
 interface IReturnRegister {
   token: string
-  user: User
-  player: Player
+  me: User & Player
 }
 
 router.on('user/register', async (packet: IParamRegister, socket): Promise<IReturnRegister> => {
@@ -28,7 +28,7 @@ router.on('user/register', async (packet: IParamRegister, socket): Promise<IRetu
   const player = await Player.createHuman(false, socket.id, user)
   const token = JWT.sign({ uid: player.uid, r: Math.random() }, CONFIG.secret)
 
-  return { token, user, player }
+  return { token, me: merge(user, player) }
 })
 
 interface IParamLogin {
@@ -39,8 +39,7 @@ interface IParamLogin {
 
 interface IReturnLogin {
   token: string
-  user: User
-  player: Player
+  me: User & Player
 }
 
 router.on('user/login', async (packet: IParamLogin, socket): Promise<IReturnLogin> => {
@@ -64,7 +63,7 @@ router.on('user/login', async (packet: IParamLogin, socket): Promise<IReturnLogi
   const player = await Player.createHuman(anonymous, socket.id, user)
   const token = JWT.sign({ uid: player.uid, r: Math.random() }, CONFIG.secret)
 
-  return { token, user, player }
+  return { token, me: merge(user, player) }
 })
 
 interface IParamLogout {

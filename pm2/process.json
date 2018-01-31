@@ -18,6 +18,10 @@
       ],
       "autorestart": true,
       "restart_delay": 1000
+    },
+    {
+      "name": "uno-db",
+      "script": "./pm2/process.db.sh"
     }
   ]
 }

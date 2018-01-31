@@ -11,21 +11,16 @@
 
 # 玩家(player)
 
-## 玩家信息
+## 玩家/ai信息
 以String形式存储，格式如下：
 `{uid}:{info}`
-其中uid的格式为
-`player.{8位字母}`
+其中uid的格式为：
+玩家： `player.{8位字母}`
+ai：`player.ai#{8位字母}`
 
 ## 在线玩家列表
 以Sets形式存储玩家uid，格式如下：
 `player.online:[{uid}, {uid}, ...]`
-
-## AI信息
-以String形式存储，格式如下：
-`{uid}:{info}`
-其中uid的格式为
-`ai.{8位字母}`
 
 
 # 房间(room)
